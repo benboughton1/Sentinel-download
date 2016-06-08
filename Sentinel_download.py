@@ -4,6 +4,7 @@
 import os,sys
 import optparse
 from xml.dom import minidom
+import shutil
 
 ###########################################################################
 class OptionParser (optparse.OptionParser):
@@ -16,6 +17,8 @@ class OptionParser (optparse.OptionParser):
           self.error("%s option not supplied" % option)
  
 ###########################################################################
+
+dl_list = []
 
 url_search="https://scihub.copernicus.eu/apihub/search?q="
 
@@ -171,6 +174,7 @@ for prod in products:
 
     #==================================download product
     if cloud<options.max_cloud or options.sentinel.find("S2")==-1:
+    	dl_list.append(filename+'.zip') #append to list of 'full downloads' to be copied to working dir
         commande_wget='%s %s --continue --output-document=%s/%s "%s"'%(wg,auth,options.write_dir,filename+".zip",link)
         #do not download the product if it was already downloaded and unzipped, or if no_download option was selected.
         unzipped_file_exists= os.path.exists(("%s/%s")%(options.write_dir,filename))
@@ -179,3 +183,7 @@ for prod in products:
 
     else :
         print "too many clouds to download this product" 
+
+if len(dl_list) > 0:
+        for i in dl_list: 
+                shutil.copyfile('~/s2/L1C/cache/%s' % i, '~/s2/L1C/work/%s' % i)
